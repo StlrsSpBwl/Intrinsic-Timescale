@@ -25,3 +25,36 @@ EEG_TC_batch(input_folder,output_folder,'Baldface');
 TC_data_folder = '/Users/jiangruitong/Library/CloudStorage/GoogleDrive-ruitongj@andrew.cmu.edu/Shared drives/NML_shared/PapersInPrep/Journals/Larry/Temporal Correlations and Performance Fluctuation/Intrinsic Timescale Time Series';
 subject_name = {"Virgil","Goku","Baldface"};
 parameters_folder = "TC";
+bandNames = {'delta','theta','alpha','beta'};
+% concatenate the data into a continuous time table
+for nS =1:numel(subject_name)
+    for nB = 1:numel(bandNames)
+        full_folder = fullfile(TC_data_folder,subject_name{nS},parameters_folder);
+        files = dir(fullfile(full_folder,sprintf('*_%s_TC.mat',bandNames{nB})));
+        data = cell(1,numel(files));
+        for nF = 1:numel(files)
+            tmp = load(fullfile(files(nF).folder,files(nF).name));%load the data first
+            % valid=tmp.keep;
+            data{nF} = timetable(tmp.time',tmp.TC, ...
+                'VariableNames',{'TC'});
+        end
+        TC_data.(subject_name{nS}).(bandNames{nB}) = vertcat(data{:});
+    end
+end
+save(fullfile(TC_data_folder,'full_tc_timeseries.mat'),'TC_data') % save the data
+%% visualize the time series with masking (save the figures)
+figure_folder = '/Users/jiangruitong/Library/CloudStorage/GoogleDrive-ruitongj@andrew.cmu.edu/Shared drives/NML_shared/PapersInPrep/Journals/Larry/Temporal Correlations and Performance Fluctuation/Time Traces Figures';
+subject_name = fieldnames(TC_data);
+band_name = fieldnames(TC_data.Baldface);
+light_on = 6;
+light_off = 19;
+for nS = 1:numel(subject_name)
+    for nB = 1:numel(band_name)
+        fig = figure;
+        save_figure_name = strcat(subject_name{nS},'_',band_name{nB},'.png');
+        TCTimeTrace(TC_data.(subject_name{nS}),light_on,light_off,band_name{nB});
+        set(fig,'Units','normalized','OuterPosition',[0 0 1 1])
+        saveas(fig,fullfile(figure_folder,save_figure_name))
+        close(fig)
+    end
+end
