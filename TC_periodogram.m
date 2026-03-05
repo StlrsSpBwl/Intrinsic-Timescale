@@ -1,0 +1,31 @@
+function [period, P1_norm]=TC_periodogram(TC_timetable,band_name,color)
+    if nargin<3, color = [0.2 0.4 0.8];
+    % Resample to hourly
+    tc_hourly = retime(TC_timetable,'hourly',@(x) median(x,'omitnan'));
+    tc_vals = fillmissing(tc_hourly.TC,'nearest');
+    % FFT
+    Fs = 1/3600;
+    L = numel(tc_vals);
+    freq=fft(tc_vals);
+    f=Fs*(0:(L/2))/L;
+    P2=abs(freq/L);
+    P1 = P2(1:L/2+1);
+    P1(2:end-1)=2*P1(2:end-1);
+    period = (1./f)/3600;
+    P1_norm = P1/sum(P1);
+    % Identify the dominant period
+    [~,iPeak]=max(P1_norm(2:end));
+    % Plot
+    plot(period,P1_norm,'Color',color,'LineWidth',4)
+    hold on
+    xline(period(iPeak+1),'k--','LineWidth','HandleVisibility','off');
+    xlim([0 48])
+    xticks(0:12:48)
+    xlabel('Period (Hr)','FontSize',18)
+    ylabel('Power Spectral Density (norm.)','FontSize',18)
+    if nargin>=2 && ~isempty(band_name)
+        title(band_name, 'FontSize', 18);
+    end
+    set(gca,'FontSize',18,'LineWidth',2)
+    box off
+end

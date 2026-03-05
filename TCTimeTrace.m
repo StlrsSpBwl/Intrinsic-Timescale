@@ -9,7 +9,7 @@ function TCTimeTrace(TC_struct,light_on_time,light_off_time,band_name,smooth_fla
         smooth_color = [44/255,123/255,182/255];
         plot(t,value,"Color",raw_color)
         hold on
-        plot(t,movmean(value,smooth_win,'omitnana'),'Color',smooth_color,'LineWidth',2)
+        plot(t,movmean(value,smooth_win,'omitnan'),'Color',smooth_color,'LineWidth',2)
     else
         smooth_color = [44/255,123/255,182/255];
         plot(t,value,"Color",smooth_color,'LineWidth',1)

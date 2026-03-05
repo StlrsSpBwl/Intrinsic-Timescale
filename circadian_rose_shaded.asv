@@ -1,0 +1,99 @@
+function [circ_med,circ_lo,circ_hi,time_edges]=circadian_rose_shaded(time_points,in_data,time_res,color,pct_lo,pct_hi,normalize,title_string);
+    if nargin<3, time_res=1;end
+    if nargin<4,color=[0.2 0.4 0.8];end
+    if nargin<5,pct_lo = 25; end
+    if nargin<6,pct_hi = 75;end
+    if nargin<7,normalize = false;end
+    if nargin<8,title_string = 'Circadian TC Profile';end
+    % Normalize: divide each day's values by that day's median
+    if normalize
+        dates = dateshift(time_points,'start','day');
+        unique_days = unique(dates);
+        for d=1:numel(unique_days)
+            idx = dates==unique_days(d);
+            day_med = median(in_data(idx),'omitnan');
+            if day_med>0
+                in_data(idx)=in_data(idx)/day_med;
+            end
+        end
+    end
+    % Bin data by time of day
+    time_edges = hours(0:time_res:24);
+    tod = timeofday(time_points);
+    nBins = numel(time_edges)-1;
+    circ_med = nan(nBins,1);
+    circ_lo = nan(nBins,1);
+    circ_hi = nan(nBins,1);
+    for b=1:nBins
+        idx = tod>=time_edges(b)&tod<time_edges(b+1);
+        vals = in_data(idx);
+        vals=vals(~isnan(vals));
+        if isempty(vals), continue;end
+        circ_med(b)=median(vals);
+        circ_lo(b)=prctile(vals,pct_lo);
+        circ_hi(b)=prctile(vals,pct_hi);
+    end
+    % convert to radian
+    bin_centers_hr = (0:nBins-1)'*time_res + time_res/2;
+    theta=(bin_centers_hr/24)*2*pi;
+    % wrapping first point to end
+    theta_c = [theta;theta(1)];
+    med_c=[circ_med;circ_med(1)];
+    lo_c = [circ_lo;circ_lo(1)];
+    hi_c = [circ_hi;circ_hi(1)];
+    % Generate plot
+    % Shaded IQR band
+    theta_fill = [theta_c;flipud(theta_c)];
+    rho_fill = [hi_c;flipud(lo_c)];
+    % polarplot(nan,nan); hold on
+    ax = gca;
+    % convert polar to cartesian for fill
+    [x_fill,y_fill]=pol2cart(theta_fill,rho_fill);
+    [x_med,y_med]=pol2cart(theta_c,med_c);
+    fill(ax,x_fill,y_fill,color,'FaceAlpha',0.25,'EdgeColor','none');
+    hold on
+    plot(ax,x_med,y_med,'Color',color,'LineWidth',2)
+    % shape it like polar plot
+    axis equal
+    % reference circles with value labels
+    grid_vals = [0 1 2];
+    max_r = max(hi_c)*1.2;
+    th_circle = linspace(0,2*pi,100);
+    label_ang = pi/2+deg2rad(30);
+    for r = grid_vals
+        if r>0
+            plot(ax,r*cos(th_circle),r*sin(th_circle),'-', ...
+                'Color',[0.5 0.5 0.5],'LineWidth',0.5);
+        end
+        % text(0,r+max_r*0.03,num2str(r), ...
+            % 'HorizontalAlignment','center','FontSize',10,'Color',[0.4 0.4 0.4]);
+        
+    end
+    xlim([-max_r max_r]);ylim([-max_r max_r*1.45]);
+    % % draw circular grid
+    % grid_r = linspace(0,max_r,4);
+    % th_circle = linspace(0,2*pi,100);
+    % for r=grid_r(2:end)
+    %     plot(ax,r*cos(th_circle),r*sin(th_circle),'-', ...
+    %         'Color',[0.8 0.8 0.8],'LineWidth',0.5);
+    % end
+    % Hour labels every 2 hours
+    hour_labels = 0:2:22;
+    for h = hour_labels
+        ang = pi/2-(h/24)*2*pi;
+        % Spoke line
+        plot(ax,[0 max_r*cos(ang)],[0 max_r*sin(ang)],'-', ...
+            'Color',[0.5 0.5 0.5],'LineWidth',0.5);
+        % Label
+        text(max_r*1.15*cos(ang),max_r*1.15*sin(ang), ...
+            sprintf('%02d:00',h),'HorizontalAlignment','center', ...
+            'FontSize',12);
+    end
+    % remove axes and position title
+    set(ax,'XTick',[], 'YTick',[],'XColor','none','YColor','none')
+    box off
+    axis off
+    % title('Circadian TC Profile','FontSize',16)
+    text(0,max_r*1.35,title_string, ...
+        'HorizontalAlignment', 'center','FontSize',16,'FontWeight','bold');
+end

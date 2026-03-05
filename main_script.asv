@@ -43,20 +43,33 @@ for nS =1:numel(subject_name)
 end
 save(fullfile(TC_data_folder,'full_tc_timeseries.mat'),'TC_data') % save the data
 %% visualize the time series with masking (save the figures)
-figure_folder = '/Users/jiangruitong/Library/CloudStorage/GoogleDrive-ruitongj@andrew.cmu.edu/Shared drives/NML_shared/PapersInPrep/Journals/Larry/Temporal Correlations and Performance Fluctuation/Time Traces Figure';
+figure_folder = '/Users/jiangruitong/Library/CloudStorage/GoogleDrive-ruitongj@andrew.cmu.edu/Shared drives/NML_shared/PapersInPrep/Journals/Larry/Temporal Correlations and Performance Fluctuation/Time Traces Figures';
 subject_name = fieldnames(TC_data);
 band_name = fieldnames(TC_data.Baldface);
-
+light_on = 6;
+light_off = 19;
 for nS = 1:numel(subject_name)
     for nB = 1:numel(band_name)
         fig = figure;
-        save_figure_name = 
+        save_figure_name = strcat(subject_name{nS},'_',band_name{nB},'.png');
+        TCTimeTrace(TC_data.(subject_name{nS}),light_on,light_off,band_name{nB});
+        set(fig,'Units','normalized','OuterPosition',[0 0 1 1])
+        saveas(fig,fullfile(figure_folder,save_figure_name))
+        close(fig)
     end
 end
-fig = figure;
-AccTimeTrace(baseline_data_long.Virgil,6,19)
-title("Monkey V Baseline",'FontSize',40)
-set(fig,'Units','normalized','OuterPosition',[0 0 1 1])
-saveas(fig,fullfile(figure_folder,"MonkeyV_baseline.png"))
-saveas(fig,fullfile(figure_folder,"MonkeyV_baseline.svg"))
-close(fig)
+%% include the smooth data (using moving average)
+figure_folder_smooth='/Users/jiangruitong/Library/CloudStorage/GoogleDrive-ruitongj@andrew.cmu.edu/Shared drives/NML_shared/PapersInPrep/Journals/Larry/Temporal Correlations and Performance Fluctuation/Time Traces Figures/Smooth Trace';
+for nS=1:numel(subject_name)
+    for nB=1:numel(band_name)
+        fig = figure;
+        save_figure_name_smooth = strcat(subject_name{nS},'_',band_name{nB},'_smooth.png');
+        TCTimeTrace(TC_data.(subject_name{nS}),light_on,light_off,band_name{nB},true,120);
+        set(fig,'Units','normalized','OuterPosition',[0 0 1 1])
+        saveas(fig,fullfile(figure_folder_smooth,save_figure_name_smooth))
+        close(fig)
+    end
+end
+%% visualization polar plot style
+%circadian_rose_shaded(time_points,in_data,time_res,color,pct_lo,pct_hi)
+circadian_rose_shaded(TC_data.Virgil.theta.Time,TC_data.Virgil.theta.TC)

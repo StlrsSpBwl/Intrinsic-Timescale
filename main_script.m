@@ -58,3 +58,29 @@ for nS = 1:numel(subject_name)
         close(fig)
     end
 end
+%% include the smooth data (using moving average)
+figure_folder_smooth='/Users/jiangruitong/Library/CloudStorage/GoogleDrive-ruitongj@andrew.cmu.edu/Shared drives/NML_shared/PapersInPrep/Journals/Larry/Temporal Correlations and Performance Fluctuation/Time Traces Figures/Smooth Trace';
+for nS=1:numel(subject_name)
+    for nB=1:numel(band_name)
+        fig = figure;
+        save_figure_name_smooth = strcat(subject_name{nS},'_',band_name{nB},'_smooth.png');
+        TCTimeTrace(TC_data.(subject_name{nS}),light_on,light_off,band_name{nB},true,120);
+        set(fig,'Units','normalized','OuterPosition',[0 0 1 1])
+        saveas(fig,fullfile(figure_folder_smooth,save_figure_name_smooth))
+        close(fig)
+    end
+end
+%% visualization polar plot style
+%circadian_rose_shaded(time_points,in_data,time_res,color,pct_lo,pct_hi)
+figure_folder_rose = '/Users/jiangruitong/Library/CloudStorage/GoogleDrive-ruitongj@andrew.cmu.edu/Shared drives/NML_shared/PapersInPrep/Journals/Larry/Temporal Correlations and Performance Fluctuation/Rose Plot';
+for nS=1:numel(subject_name)
+    for nB=1:numel(band_name)
+        fig = figure;
+        save_figure_name_rose = strcat(subject_name{nS},'_',band_name{nB},'_rose.png');
+        data_strcut = TC_data.(subject_name{nS}).(band_name{nB});
+        circadian_rose_shaded(data_strcut.Time,data_strcut.TC,1,[0.2 0.4 0.8],25,75,1,strcat(subject_name{nS},{' '},band_name{nB}))
+        set(fig,'Units','normalized','OuterPosition',[0 0 1 1])
+        saveas(fig,fullfile(figure_folder_rose,save_figure_name_rose))
+        close(fig)
+    end
+end
