@@ -84,3 +84,9 @@ for nS=1:numel(subject_name)
         close(fig)
     end
 end
+%% plot out the peridogram (Virgil)
+figure;
+colors_mapping = struct('delta',[0.1 0.1 0.7],'theta',[0.2 0.6 0.2], ...
+    'alpha',[0.8 0.2 0.2],'beta',[0.9 0.5 0.1]);
+batch_perio
+

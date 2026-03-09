@@ -1,5 +1,6 @@
-function [period, P1_norm]=TC_periodogram(TC_timetable,band_name,color)
-    if nargin<3, color = [0.2 0.4 0.8];
+function [period, P1_norm]=TC_periodogram(TC_struct,band_name,color)
+    if nargin<3, color = [0.2 0.4 0.8]; end
+    TC_timetable = TC_struct.(band_name);
     % Resample to hourly
     tc_hourly = retime(TC_timetable,'hourly',@(x) median(x,'omitnan'));
     tc_vals = fillmissing(tc_hourly.TC,'nearest');
@@ -18,4 +19,14 @@ function [period, P1_norm]=TC_periodogram(TC_timetable,band_name,color)
     % Plot
     plot(period,P1_norm,'Color',color,'LineWidth',4)
     hold on
+    xline(period(iPeak+1),'k--','LineWidth','HandleVisibility','off');
+    xlim([0 48])
+    xticks(0:12:48)
+    xlabel('Period (Hr)','FontSize',18)
+    ylabel('Power Spectral Density (norm.)','FontSize',18)
+    if nargin>=2 && ~isempty(band_name)
+        title(band_name, 'FontSize', 18);
+    end
+    set(gca,'FontSize',18,'LineWidth',2)
+    box off
 end

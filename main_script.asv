@@ -72,4 +72,24 @@ for nS=1:numel(subject_name)
 end
 %% visualization polar plot style
 %circadian_rose_shaded(time_points,in_data,time_res,color,pct_lo,pct_hi)
-circadian_rose_shaded(TC_data.Virgil.theta.Time,TC_data.Virgil.theta.TC)
+figure_folder_rose = '/Users/jiangruitong/Library/CloudStorage/GoogleDrive-ruitongj@andrew.cmu.edu/Shared drives/NML_shared/PapersInPrep/Journals/Larry/Temporal Correlations and Performance Fluctuation/Rose Plot';
+for nS=1:numel(subject_name)
+    for nB=1:numel(band_name)
+        fig = figure;
+        save_figure_name_rose = strcat(subject_name{nS},'_',band_name{nB},'_rose.png');
+        data_strcut = TC_data.(subject_name{nS}).(band_name{nB});
+        circadian_rose_shaded(data_strcut.Time,data_strcut.TC,1,[0.2 0.4 0.8],25,75,1,strcat(subject_name{nS},{' '},band_name{nB}))
+        set(fig,'Units','normalized','OuterPosition',[0 0 1 1])
+        saveas(fig,fullfile(figure_folder_rose,save_figure_name_rose))
+        close(fig)
+    end
+end
+%% plot out the peridogram
+figure;
+colors_mapping = struct('delta',[0.1 0.1 0.7],'theta',[0.2 0.6 0.2], ...
+    'alpha',[0.8 0.2 0.2],'beta',[0.9 0.5 0.1]);
+bandNames=fieldnames(TC_data.Virgil);
+for nB = 1:numel(bandNames)
+    [~,~]=TC_periodogram(TC_data.Virgil,bandNames{nB},colors_mapping.(bandNames{nB}),0);
+end
+legend(bandNames,'FontSize',14)
