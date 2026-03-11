@@ -88,5 +88,21 @@ end
 figure;
 colors_mapping = struct('delta',[0.1 0.1 0.7],'theta',[0.2 0.6 0.2], ...
     'alpha',[0.8 0.2 0.2],'beta',[0.9 0.5 0.1]);
-batch_perio
+batch_periodogram(TC_data,"Virgil",colors_mapping)
 
+batch_periodogram(TC_data,"Goku",colors_mapping)
+
+batch_periodogram(TC_data,"Baldface",colors_mapping)
+%% convert data to time table
+table_output_folder = '/Users/jiangruitong/Library/CloudStorage/GoogleDrive-ruitongj@andrew.cmu.edu/Shared drives/NML_shared/PapersInPrep/Journals/Larry/Temporal Correlations and Performance Fluctuation';
+for nB = 1:numel(bandNames)
+    band=bandNames{nB};
+    T=TC_data.(subject_name{1}).(band);
+    T.Properties.VariableNames = subject_name(1);
+    for nS = 2:numel(subject_name)
+        T2=TC_data.(subject_name{nS}).(band);
+        T2.Properties.VariableNames = subject_name(nS);
+        T = synchronize(T,T2,'union','nearest');
+    end
+    writetimetable(T,fullfile(table_output_folder,['timescale_',band,'.csv']))
+end

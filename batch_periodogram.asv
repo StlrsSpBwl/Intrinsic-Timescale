@@ -22,8 +22,5 @@ function batch_periodogram(TC_struct,subject,colors_mapping)
     %     'FontSize',18,'Rotation',90, ...
     %     'EdgeColor','none','HorizontalAlignment','center', ...
     %     'FitBoxToText','off');
-    han = axes('Visible','off');
-    han.YLabel.Visible='on';
-    ylabel(han,'Power Spectral Density (norm.)','FontSize',18)
     sgtitle(subject,'FontSize',22,'FontWeight','bold')
 end
