@@ -10,7 +10,7 @@ function out = tc_power_from_edf_file(edf_path, bandHz)
     P.step_sec    = 30;
     P.maxLag_sec  = 60;
 
-    P.baseline_sec = [40 60]; % BUG REPORT FIX: baseline window
+    P.baseline_sec = [40 60]; % BUG REPORT FIX: baseline window (following Muller et al's approach)
 
     P.accBadZ     = 4;
     P.eegAmp      = 0.3;

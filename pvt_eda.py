@@ -4,22 +4,34 @@ import numpy as np
 from scipy import stats as sp_stats
 from scikit_posthocs import posthoc_dunn
 
-def pvt_eda(df_trials):
+def pvt_eda(df_all,rt_min=0.1,rt_max=4.0):
     """
     df_trials: one subject's trials DataFrame from compile_pvt_data()
         (columns: ['subject', 'session', 'trial', 'rt'])
+    rt_min/rt_max: bounds for valid RTs (seconds)
     """
-    # Summary stats per session
+    # flag and filter
+    too_short = df_all['rt']<=rt_min
+    too_long = df_all['rt']>=rt_max
+    valid = ~too_short & ~too_long
+    df_trials = df_all[valid].copy()
+    # Summary stats per session (using the clean data)
     summary = df_trials.groupby('session')['rt'].agg(
+        n='count',
         median = 'median',
         min='min',
         max='max',
-        q1 = lambda x:x.quantile(0.25)
-        q3 = lambda x:x.quantile(0.75)
+        q1 = lambda x: x.quantile(0.25),
+        q3 = lambda x: x.quantile(0.75)
     )
     summary['iqr'] = summary['q3'] - summary['q1']
+    # Add rejection counts
+    summary['n_too_short'] = df_all[too_short].groupby('session').size()
+    summary['n_too_long'] = df_all[too_long].groupby('session').size()
+    summary[['n_too_short','n_too_long']] = summary[['n_too_short','n_too_long']].fillna(0).astype(int)
+
     print('===Descriptive stats===')
-    print(summary[['min','q1','median','q3','max','iqr']])
+    print(summary[['n','n_too_short','n_too_long','min','q1','median','q3','max','iqr']])
     # Normality test (Shapiro-Wilk per session)
     print('\n===Shapiro-Wilk normality test===')
     groups = {}
